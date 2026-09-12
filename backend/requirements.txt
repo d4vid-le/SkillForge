@@ -1,0 +1,15 @@
+# SkillForge Backend Dependencies
+# Install: pip install -r requirements.txt
+
+# Web framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+
+# Apple MLX (macOS Apple Silicon only)
+mlx>=0.5.0
+mlx-lm>=0.5.0
+
+# Utilities
+numpy>=1.24.0
+safetensors>=0.4.0

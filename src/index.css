@@ -1,1 +1,103 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0b0e14;
+  --color-bg-panel: #12161f;
+  --color-border: #232a38;
+  --color-cyan: #53c2ff;
+  --color-green: #3ddc84;
+  --color-orange: #ffb454;
+  --color-red: #ff6060;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #8a92a6;
+  --color-text-muted: #4a5568;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4255;
+}
+
+/* Slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: var(--color-border);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  margin-top: -5px;
+  border: 2px solid var(--color-bg-panel);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--color-border);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  border: 2px solid var(--color-bg-panel);
+}
+
+/* Pulse animation for training */
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-cyan {
+  animation: pulse-cyan 2s ease-in-out infinite;
+}
+
+/* Sparkline animation */
+@keyframes draw-line {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
