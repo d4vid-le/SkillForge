@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #0b0e14;
-  --color-bg-panel: #12161f;
-  --color-border: #232a38;
-  --color-cyan: #53c2ff;
-  --color-green: #3ddc84;
-  --color-orange: #ffb454;
-  --color-red: #ff6060;
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #8a92a6;
-  --color-text-muted: #4a5568;
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --color-bg-base: #1e1e1e;
+  --color-bg-panel: #2d2d2d;
+  --color-bg-elevated: #3a3a3a;
+  --color-border: #3a3a3a;
+  --color-border-subtle: #333333;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #8e8e93;
+  --color-text-muted: #636366;
+  --color-accent: #0a84ff;
+  --color-success: #30d158;
+  --color-error: #ff453a;
+  --color-warning: #ffd60a;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 }
 
 * {
@@ -21,83 +23,104 @@
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg-primary);
+  background: var(--color-bg-base);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--color-bg-elevated);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a4255;
+  background: #4a4a4a;
 }
 
-/* Slider styling */
+/* Range slider — minimal macOS style */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
   width: 100%;
+  height: 20px;
 }
 
-input[type="range"]::-webkit-slider-track {
-  background: var(--color-border);
-  height: 4px;
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--color-bg-elevated);
+  height: 3px;
   border-radius: 2px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--color-cyan);
-  margin-top: -5px;
-  border: 2px solid var(--color-bg-panel);
+  background: var(--color-text-primary);
+  margin-top: -4.5px;
+  border: none;
+  transition: background 0.15s;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--color-accent);
+}
+
+input[type="range"]:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+input[type="range"]:disabled::-webkit-slider-thumb {
+  background: var(--color-text-muted);
 }
 
 input[type="range"]::-moz-range-track {
-  background: var(--color-border);
-  height: 4px;
+  background: var(--color-bg-elevated);
+  height: 3px;
   border-radius: 2px;
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--color-cyan);
-  border: 2px solid var(--color-bg-panel);
+  background: var(--color-text-primary);
+  border: none;
 }
 
-/* Pulse animation for training */
-@keyframes pulse-cyan {
+@keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.3; }
 }
 
-.animate-pulse-cyan {
-  animation: pulse-cyan 2s ease-in-out infinite;
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
-/* Sparkline animation */
-@keyframes draw-line {
-  from { stroke-dashoffset: 1000; }
-  to { stroke-dashoffset: 0; }
+/* Subtle row hover */
+.row-hover:hover {
+  background: var(--color-bg-elevated);
+}
+
+/* Quarantined items — subtle opacity, not red */
+.quarantined {
+  opacity: 0.45;
+}
+
+.quarantined:hover {
+  opacity: 0.6;
 }

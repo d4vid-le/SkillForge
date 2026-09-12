@@ -7,101 +7,142 @@ interface Props {
 
 export function RegistryPanel({ adapters, onQuarantine }: Props) {
   return (
-    <div className="bg-[#12161f] border border-[#232a38] rounded-lg p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold tracking-wider text-[#8a92a6] uppercase">Registry</h2>
+    <div className="bg-[#2d2d2d] rounded-lg p-4 flex flex-col">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[11px] font-semibold tracking-wider text-[#8e8e93] uppercase">Registry</h2>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-mono text-[#8a92a6]">
-            {adapters.filter(a => a.status === 'keeper').length} keeper
+          <span className="text-[9px] font-mono text-[#636366]">
+            {adapters.filter(a => a.status === 'keeper').length} active
           </span>
-          <span className="text-[10px] font-mono text-[#ff6060]">
-            {adapters.filter(a => a.status === 'quarantined').length} quarantined
+          <span className="text-[9px] font-mono text-[#636366]">
+            {adapters.filter(a => a.status === 'quarantined').length} disabled
           </span>
         </div>
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-2 px-2 py-1.5 border-b border-[#232a38] mb-1">
-        <div className="col-span-3 text-[10px] text-[#8a92a6] uppercase">Domain</div>
-        <div className="col-span-2 text-[10px] text-[#8a92a6] uppercase">Status</div>
-        <div className="col-span-2 text-[10px] text-[#8a92a6] uppercase">Greedy</div>
-        <div className="col-span-2 text-[10px] text-[#8a92a6] uppercase">Robust</div>
-        <div className="col-span-3 text-[10px] text-[#8a92a6] uppercase text-right">Action</div>
+      <div className="grid grid-cols-12 gap-1 px-2 py-1 border-b border-[#3a3a3a] mb-0.5">
+        <div className="col-span-2 text-[9px] text-[#636366]">domain</div>
+        <div className="col-span-2 text-[9px] text-[#636366]">status</div>
+        <div className="col-span-1 text-[9px] text-[#636366]">rank</div>
+        <div className="col-span-1 text-[9px] text-[#636366]">size</div>
+        <div className="col-span-2 text-[9px] text-[#636366]">greedy</div>
+        <div className="col-span-2 text-[9px] text-[#636366]">robust</div>
+        <div className="col-span-2 text-[9px] text-[#636366] text-right">action</div>
       </div>
 
       {/* Table Rows */}
-      <div className="space-y-0.5 max-h-[280px] overflow-y-auto">
-        {adapters.map(adapter => (
-          <div
-            key={adapter.id}
-            className={`grid grid-cols-12 gap-2 px-2 py-2 rounded items-center transition-colors ${
-              adapter.status === 'quarantined' 
-                ? 'bg-[#ff6060]/5 hover:bg-[#ff6060]/10' 
-                : 'hover:bg-[#232a38]/50'
-            }`}
-          >
-            <div className="col-span-3">
-              <span className="text-xs font-mono text-[#e0e0e0] truncate">{adapter.domain}</span>
+      <div className="space-y-0.5 flex-1 overflow-y-auto max-h-[220px]">
+        {adapters.map(adapter => {
+          const isQuarantined = adapter.status === 'quarantined';
+          const isTraining = adapter.status === 'training';
+
+          return (
+            <div
+              key={adapter.id}
+              className={`grid grid-cols-12 gap-1 px-2 py-1.5 rounded items-center row-hover transition-opacity ${
+                isQuarantined ? 'quarantined' : ''
+              }`}
+            >
+              {/* Domain */}
+              <div className="col-span-2">
+                <span className="text-[10px] font-mono text-white truncate">
+                  {adapter.domain}
+                </span>
+              </div>
+
+              {/* Status */}
+              <div className="col-span-2">
+                <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                  adapter.status === 'keeper'
+                    ? 'text-[#8e8e93] bg-[#3a3a3a]/50'
+                    : adapter.status === 'quarantined'
+                    ? 'text-[#636366] bg-[#3a3a3a]/30 line-through'
+                    : adapter.status === 'training'
+                    ? 'text-[#0a84ff] bg-[#0a84ff]/10'
+                    : 'text-[#8e8e93] bg-[#3a3a3a]/50'
+                }`}>
+                  {adapter.status === 'keeper' ? 'keeper' :
+                   adapter.status === 'quarantined' ? 'disabled' :
+                   adapter.status === 'training' ? 'training' : 'archived'}
+                </span>
+              </div>
+
+              {/* Rank */}
+              <div className="col-span-1">
+                <span className="text-[10px] font-mono text-[#8e8e93]">{adapter.rank}</span>
+              </div>
+
+              {/* Size */}
+              <div className="col-span-1">
+                <span className="text-[10px] font-mono text-[#8e8e93]">
+                  {adapter.sizeMB > 0 ? `${adapter.sizeMB}M` : '—'}
+                </span>
+              </div>
+
+              {/* Greedy (vs base) */}
+              <div className="col-span-2">
+                {adapter.greedyScore !== null ? (
+                  <div>
+                    <span className="text-[10px] font-mono text-white">{adapter.greedyScore.toFixed(3)}</span>
+                    <span className="text-[9px] font-mono text-[#636366] ml-1">
+                      ({adapter.baseGreedy.toFixed(2)})
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] font-mono text-[#636366]">—</span>
+                )}
+              </div>
+
+              {/* Robust (vs base) */}
+              <div className="col-span-2">
+                {adapter.robustScore !== null ? (
+                  <div className="flex items-center gap-1">
+                    <span className={`text-[10px] font-mono ${
+                      adapter.robustPass ? 'text-white' : 'text-[#ff453a]'
+                    }`}>
+                      {adapter.robustScore.toFixed(3)}
+                    </span>
+                    <span className="text-[9px] font-mono text-[#636366]">
+                      ({adapter.baseRobust.toFixed(2)})
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] font-mono text-[#636366]">—</span>
+                )}
+              </div>
+
+              {/* Action */}
+              <div className="col-span-2 text-right">
+                {adapter.status === 'keeper' && (
+                  <button
+                    onClick={() => onQuarantine(adapter.id)}
+                    className="px-2 py-0.5 bg-[#3a3a3a] hover:bg-[#4a4a4a] rounded text-[9px] font-mono text-[#8e8e93] transition-colors"
+                  >
+                    disable
+                  </button>
+                )}
+                {adapter.status === 'quarantined' && (
+                  <span className="text-[9px] font-mono text-[#636366]">gate → 0.0</span>
+                )}
+                {isTraining && (
+                  <span className="text-[9px] font-mono text-[#0a84ff]">
+                    {adapter.trainingProgress
+                      ? `${adapter.trainingProgress.step}/${adapter.trainingProgress.total}`
+                      : '...'}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="col-span-2">
-              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                adapter.status === 'keeper' 
-                  ? 'bg-[#3ddc84]/10 text-[#3ddc84]' 
-                  : adapter.status === 'quarantined'
-                  ? 'bg-[#ff6060]/10 text-[#ff6060]'
-                  : adapter.status === 'training'
-                  ? 'bg-[#53c2ff]/10 text-[#53c2ff]'
-                  : 'bg-[#ffb454]/10 text-[#ffb454]'
-              }`}>
-                {adapter.status === 'keeper' ? 'KEEPER' : 
-                 adapter.status === 'quarantined' ? 'QUAR' :
-                 adapter.status === 'training' ? 'TRAIN' : 'EVAL'}
-              </span>
-            </div>
-            <div className="col-span-2">
-              <span className="text-xs font-mono text-[#8a92a6]">
-                {adapter.greedyScore !== null ? adapter.greedyScore.toFixed(3) : '—'}
-              </span>
-            </div>
-            <div className="col-span-2">
-              <span className={`text-xs font-mono ${
-                adapter.robustPass === true ? 'text-[#3ddc84]' :
-                adapter.robustPass === false ? 'text-[#ff6060]' : 'text-[#8a92a6]'
-              }`}>
-                {adapter.robustScore !== null ? adapter.robustScore.toFixed(3) : '—'}
-              </span>
-            </div>
-            <div className="col-span-3 text-right">
-              {adapter.status === 'keeper' && (
-                <button
-                  onClick={() => onQuarantine(adapter.id)}
-                  className="px-2 py-1 bg-[#ff6060]/10 hover:bg-[#ff6060]/20 border border-[#ff6060]/30 rounded text-[10px] font-mono text-[#ff6060] transition-colors"
-                >
-                  Quarantine
-                </button>
-              )}
-              {adapter.status === 'quarantined' && (
-                <span className="text-[10px] font-mono text-[#4a5568]">GATED → 0.0</span>
-              )}
-              {adapter.status === 'training' && (
-                <span className="text-[10px] font-mono text-[#53c2ff] animate-pulse-cyan">●●●</span>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {adapters.length === 0 && (
-        <div className="text-center py-8">
-          <span className="text-xs text-[#4a5568] font-mono">No adapters in registry</span>
+        <div className="text-center py-8 flex-1 flex items-center justify-center">
+          <span className="text-[11px] text-[#636366] font-mono">no adapters</span>
         </div>
       )}
-
-      {/* R4 Badge */}
-      <div className="mt-3 flex items-center justify-between px-2 py-1.5 bg-[#0b0e14] border border-[#232a38] rounded">
-        <span className="text-[10px] text-[#8a92a6]">R4 QUARANTINE</span>
-        <span className="text-[10px] font-mono text-[#3ddc84]">✓ ENFORCED</span>
-      </div>
     </div>
   );
 }

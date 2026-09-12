@@ -3,107 +3,159 @@ import type { EvalResult } from '../types';
 interface Props {
   currentEval: EvalResult | null;
   onRunEval: () => void;
-  isEvaluating?: boolean;
 }
+
+const GREEDY_THRESHOLD = 0.75;
+const ROBUST_THRESHOLD = 0.65;
+const HOLDOUT_THRESHOLD = 5;
 
 export function EvalPanel({ currentEval, onRunEval }: Props) {
   return (
-    <div className="bg-[#12161f] border border-[#232a38] rounded-lg p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold tracking-wider text-[#8a92a6] uppercase">Eval</h2>
+    <div className="bg-[#2d2d2d] rounded-lg p-4 flex flex-col">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[11px] font-semibold tracking-wider text-[#8e8e93] uppercase">Eval</h2>
         <button
           onClick={onRunEval}
-          className="px-3 py-1 bg-[#232a38] hover:bg-[#2d3548] border border-[#3a4255] rounded text-xs font-mono text-[#53c2ff] transition-colors"
+          className="px-2.5 py-1 bg-[#3a3a3a] hover:bg-[#4a4a4a] rounded text-[10px] font-mono text-[#8e8e93] transition-colors"
         >
-          Run Eval
+          run
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        {/* Greedy Score */}
-        <div className="bg-[#0b0e14] border border-[#232a38] rounded p-4 text-center">
-          <div className="text-[10px] text-[#8a92a6] uppercase tracking-wider mb-2">Greedy Score</div>
-          <div className={`text-2xl font-mono font-bold ${
-            currentEval ? (currentEval.greedyScore > 0.75 ? 'text-[#3ddc84]' : 'text-[#ffb454]') : 'text-[#4a5568]'
-          }`}>
-            {currentEval ? currentEval.greedyScore.toFixed(3) : '—'}
+      {/* Scores with base baseline */}
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {/* Greedy */}
+        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded p-3">
+          <div className="text-[9px] text-[#636366] uppercase tracking-wider mb-1.5">greedy</div>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-xl font-mono font-semibold ${
+              !currentEval ? 'text-[#636366]' :
+              currentEval.greedyScore >= GREEDY_THRESHOLD ? 'text-white' : 'text-[#ffd60a]'
+            }`}>
+              {currentEval ? currentEval.greedyScore.toFixed(3) : '—'}
+            </span>
           </div>
           {currentEval && (
-            <div className={`mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-mono ${
-              currentEval.greedyScore > 0.75 
-                ? 'bg-[#3ddc84]/10 text-[#3ddc84]' 
-                : 'bg-[#ffb454]/10 text-[#ffb454]'
-            }`}>
-              {currentEval.greedyScore > 0.75 ? 'PASS' : 'WARN'}
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-[9px] font-mono text-[#636366]">
+                base {currentEval.baseGreedy.toFixed(3)}
+              </span>
+              <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                currentEval.greedyScore >= GREEDY_THRESHOLD
+                  ? 'bg-[#30d158]/10 text-[#30d158]'
+                  : 'bg-[#ffd60a]/10 text-[#ffd60a]'
+              }`}>
+                {currentEval.greedyScore >= GREEDY_THRESHOLD ? `≥${GREEDY_THRESHOLD}` : `<${GREEDY_THRESHOLD}`}
+              </span>
             </div>
           )}
         </div>
 
-        {/* Robust Score */}
-        <div className="bg-[#0b0e14] border border-[#232a38] rounded p-4 text-center">
-          <div className="text-[10px] text-[#8a92a6] uppercase tracking-wider mb-2">Robust Score</div>
-          <div className={`text-2xl font-mono font-bold ${
-            currentEval ? (currentEval.pass ? 'text-[#3ddc84]' : 'text-[#ff6060]') : 'text-[#4a5568]'
-          }`}>
-            {currentEval ? currentEval.robustScore.toFixed(3) : '—'}
+        {/* Robust */}
+        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded p-3">
+          <div className="text-[9px] text-[#636366] uppercase tracking-wider mb-1.5">robust</div>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-xl font-mono font-semibold ${
+              !currentEval ? 'text-[#636366]' :
+              currentEval.pass ? 'text-white' : 'text-[#ff453a]'
+            }`}>
+              {currentEval ? currentEval.robustScore.toFixed(3) : '—'}
+            </span>
           </div>
           {currentEval && (
-            <div className={`mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-mono ${
-              currentEval.pass 
-                ? 'bg-[#3ddc84]/10 text-[#3ddc84]' 
-                : 'bg-[#ff6060]/10 text-[#ff6060]'
-            }`}>
-              {currentEval.pass ? 'PASS' : 'FAIL'}
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-[9px] font-mono text-[#636366]">
+                base {currentEval.baseRobust.toFixed(3)}
+              </span>
+              <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                currentEval.pass
+                  ? 'bg-[#30d158]/10 text-[#30d158]'
+                  : 'bg-[#ff453a]/10 text-[#ff453a]'
+              }`}>
+                {currentEval.pass ? `≥${ROBUST_THRESHOLD}` : `<${ROBUST_THRESHOLD}`}
+              </span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Confidence Band */}
+      {/* Δ vs Base */}
       {currentEval && (
-        <div className="bg-[#0b0e14] border border-[#232a38] rounded p-3 mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-[#8a92a6]">95% BINOMIAL BAND</span>
-            <span className="text-[10px] font-mono text-[#53c2ff]">
+        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded p-2.5 mb-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] text-[#636366]">Δ (separated − M1)</span>
+            <span className={`text-[12px] font-mono font-semibold ${
+              currentEval.delta > 0 ? 'text-[#30d158]' : 'text-[#ff453a]'
+            }`}>
+              {currentEval.delta > 0 ? '+' : ''}{currentEval.delta.toFixed(3)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Confidence band */}
+      {currentEval && (
+        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded p-2.5 mb-2.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[9px] text-[#636366]">95% binomial band</span>
+            <span className="text-[9px] font-mono text-[#8e8e93]">
               [{currentEval.robustLower.toFixed(3)}, {currentEval.robustUpper.toFixed(3)}]
             </span>
           </div>
-          <div className="relative h-3 bg-[#232a38] rounded-full overflow-hidden">
+          <div className="relative h-2 bg-[#3a3a3a] rounded-full overflow-hidden">
             <div
-              className="absolute h-full bg-[#53c2ff]/30 rounded-full"
+              className="absolute h-full bg-[#0a84ff]/20 rounded-full"
               style={{
                 left: `${currentEval.robustLower * 100}%`,
                 width: `${(currentEval.robustUpper - currentEval.robustLower) * 100}%`,
               }}
             />
             <div
-              className="absolute top-0 h-full w-0.5 bg-[#53c2ff]"
+              className="absolute top-0 h-full w-px bg-[#0a84ff]"
               style={{ left: `${currentEval.robustScore * 100}%` }}
+            />
+            {/* Threshold marker */}
+            <div
+              className="absolute top-0 h-full w-px bg-[#636366]"
+              style={{ left: `${ROBUST_THRESHOLD * 100}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Eval Config */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="flex items-center justify-between px-2 py-1.5 bg-[#0b0e14] border border-[#232a38] rounded">
-          <span className="text-[10px] text-[#8a92a6]">TEMP</span>
-          <span className="text-[10px] font-mono text-[#e0e0e0]">
-            {currentEval ? currentEval.temp : 0.3}
-          </span>
+      {/* Holdout per domain */}
+      {currentEval && currentEval.domainHoldout.length > 0 && (
+        <div className="bg-[#1e1e1e] border border-[#3a3a3a] rounded p-2.5 mb-2.5">
+          <div className="text-[9px] text-[#636366] mb-1.5">holdout per domain (≥{HOLDOUT_THRESHOLD}/6)</div>
+          <div className="space-y-1">
+            {currentEval.domainHoldout.map(dh => (
+              <div key={dh.domain} className="flex items-center justify-between">
+                <span className="text-[10px] font-mono text-[#8e8e93]">{dh.domain}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-white">{dh.score.toFixed(1)}/6</span>
+                  <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                    dh.pass ? 'bg-[#30d158]/10 text-[#30d158]' : 'bg-[#ff453a]/10 text-[#ff453a]'
+                  }`}>
+                    {dh.pass ? 'pass' : 'fail'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center justify-between px-2 py-1.5 bg-[#0b0e14] border border-[#232a38] rounded">
-          <span className="text-[10px] text-[#8a92a6]">N SAMPLES</span>
-          <span className="text-[10px] font-mono text-[#e0e0e0]">
-            {currentEval ? currentEval.n : 6}
-          </span>
-        </div>
-      </div>
+      )}
 
-      {/* R3 Badge */}
-      <div className="mt-3 flex items-center justify-between px-2 py-1.5 bg-[#0b0e14] border border-[#232a38] rounded">
-        <span className="text-[10px] text-[#8a92a6]">R3 ROBUSTNESS</span>
-        <span className="text-[10px] font-mono text-[#3ddc84]">✓ ENFORCED</span>
+      {/* Eval params */}
+      <div className="flex items-center gap-3 mt-auto">
+        <span className="text-[9px] font-mono text-[#636366]">
+          temp {currentEval?.temp ?? 0.3}
+        </span>
+        <span className="text-[9px] font-mono text-[#636366]">
+          n={currentEval?.n ?? 6}
+        </span>
+        <span className="text-[9px] font-mono text-[#636366]">
+          8-bit gs=64
+        </span>
       </div>
     </div>
   );
