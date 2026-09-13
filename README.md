@@ -1,6 +1,5 @@
 # SkillForge
-
-SkillForge is a local-first training and inference engine that solves catastrophic forgetting by treating it as an architecture problem rather than an optimization problem. Instead of updating a model's core weights, SkillForge keeps the base model strictly frozen and encapsulates specialized skills into independent, domain-pure LoRA adapters. At inference, a bounded gating mechanism (`MultiAdapterLinear`) dynamically routes inputs to the correct skill chips.
+Skillforge isn't a just a trainer. It's a skill library OS for one frozen local model. It's a local-first training and inference engine that solves catastrophic forgetting by treating it as an architecture problem rather than an optimization problem. Instead of updating a model's core weights, SkillForge keeps the base model strictly frozen and encapsulates specialized skills into independent, domain-pure LoRA adapters. At inference, a bounded gating mechanism (`MultiAdapterLinear`) dynamically routes inputs to the correct skill chips.
 
 ## Core Principles
 
