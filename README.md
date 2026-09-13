@@ -1,8 +1,8 @@
 # SkillForge — Le-Gates Continual Learning Engine
 
-A two-stage pipeline for growing a local LLM (Apple Silicon via MLX) by adding isolated, domain-specific skills without forgetting previous knowledge.
+A three-stage pipeline for growing a local LLM (Apple Silicon via MLX) by adding isolated, domain-specific skills without forgetting previous knowledge.
 
-## Two-Stage Pipeline
+## Three-Stage Pipeline
 
 ### Stage 1: Data Pipeline
 Ingest, clean, review, and export training-ready JSONL data.
@@ -62,6 +62,35 @@ python eval_harness.py --adapter ./adapters/sql-query/ --test-data ./data/sql-te
 - `eval_harness.py` — R3 robustness evaluation with Wilson score confidence intervals
 - `server.py` — FastAPI training API
 
+### Stage 3: Skills Playground & Routing Evaluator
+Runtime interface for testing trained adapters in real-time.
+
+**Features:**
+- Chat playground with streaming responses and system prompt override
+- Real-time gate vector visualizer showing which adapters fire
+- Robustness probe: 6 samples at temp=0.3 vs greedy (temp=0.0)
+- Performance metrics: TTFT, tokens/sec, active adapters, memory usage
+- Router mode selector: keyword_v3, v3q_diagnostic, oracle
+
+**Backend:**
+```bash
+cd backend
+
+# Run inference API
+python inference_api.py  # :8002
+```
+
+**Core modules:**
+- `inference_api.py` — FastAPI endpoints for /api/chat (streaming), /api/route, /api/probe
+- Dynamic LoRA adapter loading based on gate vector
+- Robustness probe with binomial confidence calculation
+
+**API Endpoints:**
+- `POST /api/chat` — Streaming chat with gate vector
+- `POST /api/route` — Routing logic, returns gate vector
+- `POST /api/probe` — Robustness testing (1 greedy + 6 at temp 0.3)
+- `GET /api/status` — Inference server status
+
 ## Frontend
 
 ```bash
@@ -71,9 +100,10 @@ npm run build   # production
 ```
 
 **Navigation:**
-- Top nav toggles between "Data" (Stage 1) and "Forge" (Stage 2)
+- Top nav toggles between "Data" (Stage 1), "Forge" (Stage 2), and "Playground" (Stage 3)
 - Stage 1: Upload → Review → Export
 - Stage 2: Train → Route → Eval → Registry
+- Stage 3: Chat → Route → Probe → Monitor
 
 ## The Le-Gates Architecture
 
@@ -90,16 +120,16 @@ y = W_base(x) + Σ_k (gate_k · scale_k · (B_k @ A_k) @ x)
 
 The doctrine is **invisible** — baked into interface constraints, not displayed as badges.
 
-| Rule | Stage 1 Enforcement | Stage 2 Enforcement |
-|------|---------------------|---------------------|
-| R1 Base Lock | — | Checksum auto-verified. Train button blocked until verified. |
-| R2 Domain Purity | Domain purity heuristics flag cross-domain rows. | Data validator rejects cross-domain rows before training. |
-| R3 Robust Gating | — | Eval shows both greedy and robust scores with threshold badges. |
-| R4 Quarantine | — | Disabled adapters show at reduced opacity, gate locked to 0.0. |
-| R5 Precision | — | bf16 label shown, 8-bit for eval. No toggle — it's the only option. |
-| R6 Scale Math | — | Scale field is read-only, derived from α/rank. Cannot be overridden. |
-| R7 Data Gate | Length gate flags rows > max_seq_length - 200 tokens. | Data gate drops long rows silently. Count shown in audit log. |
-| R8 Audit | — | Full-width timestamped log at bottom. Color-coded by severity. |
+| Rule | Stage 1 Enforcement | Stage 2 Enforcement | Stage 3 Enforcement |
+|------|---------------------|---------------------|---------------------|
+| R1 Base Lock | — | Checksum auto-verified. Train button blocked until verified. | Base model frozen at inference. Checksum verified on load. |
+| R2 Domain Purity | Domain purity heuristics flag cross-domain rows. | Data validator rejects cross-domain rows before training. | Router only activates trained adapters. No cross-domain leakage. |
+| R3 Robust Gating | — | Eval shows both greedy and robust scores with threshold badges. | Robustness probe: 6 samples at temp=0.3 vs greedy. Pass/fail badge. |
+| R4 Quarantine | — | Disabled adapters show at reduced opacity, gate locked to 0.0. | Quarantined adapters cannot be activated in gate vector. |
+| R5 Precision | — | bf16 label shown, 8-bit for eval. No toggle — it's the only option. | Inference uses 8-bit quantization. bf16 base + 8-bit adapters. |
+| R6 Scale Math | — | Scale field is read-only, derived from α/rank. Cannot be overridden. | Scale is fixed at inference. No runtime override. |
+| R7 Data Gate | Length gate flags rows > max_seq_length - 200 tokens. | Data gate drops long rows silently. Count shown in audit log. | Inference respects max_seq_length. Prompts truncated if needed. |
+| R8 Audit | — | Full-width timestamped log at bottom. Color-coded by severity. | Chat logs with gate vectors, probe results with timestamps. |
 
 ## Design System
 
@@ -136,9 +166,15 @@ Warning:      #ffd60a (warnings only)
 │   │   ├── RoutePanel.tsx        # Gate sliders + hot-swap
 │   │   ├── EvalPanel.tsx         # Scores + baselines + Δ
 │   │   ├── RegistryPanel.tsx     # Adapter table
-│   │   └── LogPanel.tsx          # Audit log
+│   │   ├── LogPanel.tsx          # Audit log
+│   │   ├── PlaygroundStage.tsx   # Stage 3 container
+│   │   ├── ChatPanel.tsx         # Chat interface with streaming
+│   │   ├── GateVectorPanel.tsx   # Real-time gate visualizer
+│   │   ├── RobustnessPanel.tsx   # Robustness probe results
+│   │   └── PerformanceFooter.tsx # Performance metrics
 │   ├── store.ts                  # Stage 2 state
 │   ├── dataStore.ts              # Stage 1 state
+│   ├── playgroundStore.ts        # Stage 3 state
 │   └── types.ts                  # TypeScript types
 ├── backend/                      # Python backend
 │   ├── cleaning.py               # Data cleaning engine
@@ -147,6 +183,7 @@ Warning:      #ffd60a (warnings only)
 │   ├── data_validator.py         # R2 + R7 validation
 │   ├── eval_harness.py           # R3 robustness eval
 │   ├── server.py                 # Stage 2 FastAPI
+│   ├── inference_api.py          # Stage 3 FastAPI (chat, route, probe)
 │   └── requirements.txt
 └── README.md
 ```

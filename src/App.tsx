@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { DataStage } from './components/DataStage';
 import { ForgeStage } from './components/ForgeStage';
+import { PlaygroundStage } from './components/PlaygroundStage';
 
-type Stage = 'data' | 'forge';
+type Stage = 'data' | 'forge' | 'playground';
 
 function App() {
   const [stage, setStage] = useState<Stage>('data');
@@ -41,16 +42,26 @@ function App() {
               >
                 Forge
               </button>
+              <button
+                onClick={() => setStage('playground')}
+                className={`px-3 py-1.5 rounded text-[11px] font-medium transition-colors ${
+                  stage === 'playground'
+                    ? 'bg-[#0a84ff]/15 text-[#0a84ff] border border-[#0a84ff]/30'
+                    : 'text-[#8e8e93] hover:text-white'
+                }`}
+              >
+                Playground
+              </button>
             </div>
           </div>
           <div className="text-[10px] font-mono text-[#636366]">
-            {stage === 'data' ? 'Stage 1: Data Pipeline' : 'Stage 2: Training Engine'}
+            {stage === 'data' ? 'Stage 1: Data Pipeline' : stage === 'forge' ? 'Stage 2: Training Engine' : 'Stage 3: Skills Playground'}
           </div>
         </div>
       </nav>
 
       {/* Stage Content */}
-      {stage === 'data' ? <DataStage /> : <ForgeStage />}
+      {stage === 'data' ? <DataStage /> : stage === 'forge' ? <ForgeStage /> : <PlaygroundStage />}
     </div>
   );
 }
