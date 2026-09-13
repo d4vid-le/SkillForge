@@ -89,3 +89,46 @@ export interface LogEntry {
   severity: LogSeverity;
   message: string;
 }
+
+// ============================================================================
+// Stage 1: Data Pipeline Types
+// ============================================================================
+
+export type RowStatus = 'kept' | 'rejected' | 'flagged';
+
+export interface RawRow {
+  id: string;
+  prompt: string;
+  target: string;
+  source: string;
+  tokenCount: number;
+  isDuplicate: boolean;
+  formatValid: boolean;
+  domainFlags: string[];
+}
+
+export interface CleanedRow extends RawRow {
+  status: RowStatus;
+  flags: string[];
+  editedPrompt: string;
+  editedTarget: string;
+}
+
+export interface ProcessingConfig {
+  maxSeqLength: number;
+  domain: string;
+  deduplicate: boolean;
+  autoFormat: boolean;
+  domainPurityCheck: boolean;
+}
+
+export interface ProcessingStats {
+  totalRows: number;
+  duplicates: number;
+  overLength: number;
+  formatInvalid: number;
+  domainFlagged: number;
+  kept: number;
+  flagged: number;
+  rejected: number;
+}

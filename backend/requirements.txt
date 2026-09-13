@@ -5,10 +5,14 @@
 fastapi>=0.104.0
 uvicorn>=0.24.0
 pydantic>=2.5.0
+python-multipart>=0.0.6
 
 # Apple MLX (macOS Apple Silicon only)
 mlx>=0.5.0
 mlx-lm>=0.5.0
+
+# Tokenization (for data pipeline R7 length gate)
+transformers>=4.36.0
 
 # Utilities
 numpy>=1.24.0
